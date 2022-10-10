@@ -4,12 +4,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.kafka.core.KafkaProducerException;
 import org.springframework.kafka.core.KafkaSendCallback;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.RoutingKafkaTemplate;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 public class ClipProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final RoutingKafkaTemplate routingKafkaTemplate;
+    private final ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate;
 
     public void async(String topic, String message){
         var future = kafkaTemplate.send(topic,message);
@@ -47,5 +51,19 @@ public class ClipProducer {
         } catch (TimeoutException e) {
             e.printStackTrace();
         }
+    }
+    public void routingSend(String topic, String message){
+        routingKafkaTemplate.send(topic, message);
+    }
+    public void routingSendBytes(String topic, byte[] message){
+        routingKafkaTemplate.send(topic, message);
+    }
+    public void replyingSend(String topic, String message)
+        throws ExecutionException, InterruptedException, TimeoutException
+    {
+        var record = new ProducerRecord<String, String>(topic, message);
+        var replyFuture = replyingKafkaTemplate.sendAndReceive(record);
+        var consumerRecord = replyFuture.get(10, TimeUnit.SECONDS);
+        System.out.println(consumerRecord.value());
     }
 }

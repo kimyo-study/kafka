@@ -30,7 +30,10 @@ public class KafkaTopicConfiguration {
                 .partitions(3)
                 .replicas(1)
                 .config(TopicConfig.RETENTION_MS_CONFIG, String.valueOf(1000*60*60))
-                .build()
+                .build(),
+            TopicBuilder.name("clip3-bytes").build(),
+            TopicBuilder.name("clip3-request").build(),
+            TopicBuilder.name("clip3-replies").build()
         );
     }
 
