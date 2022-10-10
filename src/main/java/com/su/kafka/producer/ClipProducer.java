@@ -20,8 +20,6 @@ import lombok.RequiredArgsConstructor;
 public class ClipProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final RoutingKafkaTemplate routingKafkaTemplate;
-    private final ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate;
 
     public void async(String topic, String message){
         var future = kafkaTemplate.send(topic,message);
@@ -38,32 +36,5 @@ public class ClipProducer {
 
             }
         });
-    }
-    public void sync(String topic, String message){
-        var future = kafkaTemplate.send(topic, message);
-        try {
-            System.out.println("Success to send message sync");
-            future.get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
-    }
-    public void routingSend(String topic, String message){
-        routingKafkaTemplate.send(topic, message);
-    }
-    public void routingSendBytes(String topic, byte[] message){
-        routingKafkaTemplate.send(topic, message);
-    }
-    public void replyingSend(String topic, String message)
-        throws ExecutionException, InterruptedException, TimeoutException
-    {
-        var record = new ProducerRecord<String, String>(topic, message);
-        var replyFuture = replyingKafkaTemplate.sendAndReceive(record);
-        var consumerRecord = replyFuture.get(10, TimeUnit.SECONDS);
-        System.out.println(consumerRecord.value());
     }
 }
