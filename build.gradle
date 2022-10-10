@@ -1,5 +1,5 @@
 plugins {
-    id 'org.springframework.boot' version '2.5.5' // 2.7.4 -> 2.5.5 로 바꾸니까 됨 kafka template
+    id 'org.springframework.boot' version '2.5.5'
     id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id 'java'
 }
@@ -15,7 +15,7 @@ repositories {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.13.4'
 
     implementation 'org.springframework.kafka:spring-kafka'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

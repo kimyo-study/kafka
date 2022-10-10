@@ -12,6 +12,9 @@ import org.springframework.kafka.core.RoutingKafkaTemplate;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+
+import com.su.kafka.model.Animal;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,50 +23,25 @@ import lombok.RequiredArgsConstructor;
 public class ClipProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
-    private final RoutingKafkaTemplate routingKafkaTemplate;
-    private final ReplyingKafkaTemplate<String, String, String> replyingKafkaTemplate;
+    private final KafkaTemplate<String, Animal> kafkaJsonTemplate;
 
-    public void async(String topic, String message){
-        var future = kafkaTemplate.send(topic,message);
-        future.addCallback(new KafkaSendCallback<>(){
+    public void async(String topic, String message) {
+        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, message);
+        future.addCallback(new KafkaSendCallback<>() {
             @Override
-            public void onFailure(KafkaProducerException ex){
-                var record = ex.getFailedProducerRecord();
-                System.out.println("Fail to send messge. record = " + record);
+            public void onFailure(KafkaProducerException ex) {
+                ProducerRecord<Object, Object> record = ex.getFailedProducerRecord();
+                System.out.println("Fail to send message. record=" + record);
             }
-            @Override
-            public void onSuccess(SendResult<String,String> result){
-                var record = result.getProducerRecord();
-                System.out.println("Success to send message. record = " + record);
 
+            @Override
+            public void onSuccess(SendResult<String, String> result) {
+                System.out.println("Success to send message.");
             }
         });
     }
-    public void sync(String topic, String message){
-        var future = kafkaTemplate.send(topic, message);
-        try {
-            System.out.println("Success to send message sync");
-            future.get(10, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        }
-    }
-    public void routingSend(String topic, String message){
-        routingKafkaTemplate.send(topic, message);
-    }
-    public void routingSendBytes(String topic, byte[] message){
-        routingKafkaTemplate.send(topic, message);
-    }
-    public void replyingSend(String topic, String message)
-        throws ExecutionException, InterruptedException, TimeoutException
-    {
-        var record = new ProducerRecord<String, String>(topic, message);
-        var replyFuture = replyingKafkaTemplate.sendAndReceive(record);
-        var consumerRecord = replyFuture.get(10, TimeUnit.SECONDS);
-        System.out.println(consumerRecord.value());
+
+    public void async(String topic, Animal animal) {
+        kafkaJsonTemplate.send(topic, animal);
     }
 }
