@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 
+import com.su.kafka.model.Animal;
 import com.su.kafka.producer.ClipProducer;
 
 @SpringBootApplication
@@ -21,21 +22,8 @@ public class Main {
         KafkaMessageListenerContainer<String, String> kafkaMessageListenerContainer
     ){
         return args -> {
-            clipProducer.async("clip4", "Hello, Clip4 Container!");
-            kafkaMessageListenerContainer.start();
-
-            Thread.sleep(1000);
-            System.out.println(" -- pause -- ");
-            kafkaMessageListenerContainer.pause();
+            clipProducer.async("clip4-animal", new Animal("puppy",1));
             Thread.sleep(3000);
-            clipProducer.async("clip4", "Hello Secondly Clip4 Conainer!");
-
-            System.out.println(" -- resume --");
-            kafkaMessageListenerContainer.resume();
-            Thread.sleep(1000);
-            System.out.println(" -- stop --");
-            kafkaMessageListenerContainer.stop();
-
         };
     }
 }

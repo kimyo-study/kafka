@@ -12,6 +12,9 @@ import org.springframework.kafka.core.RoutingKafkaTemplate;
 import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.concurrent.ListenableFuture;
+
+import com.su.kafka.model.Animal;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,21 +23,25 @@ import lombok.RequiredArgsConstructor;
 public class ClipProducer {
 
     private final KafkaTemplate<String, String> kafkaTemplate;
+    private final KafkaTemplate<String, Animal> kafkaJsonTemplate;
 
-    public void async(String topic, String message){
-        var future = kafkaTemplate.send(topic,message);
-        future.addCallback(new KafkaSendCallback<>(){
+    public void async(String topic, String message) {
+        ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send(topic, message);
+        future.addCallback(new KafkaSendCallback<>() {
             @Override
-            public void onFailure(KafkaProducerException ex){
-                var record = ex.getFailedProducerRecord();
-                System.out.println("Fail to send messge. record = " + record);
+            public void onFailure(KafkaProducerException ex) {
+                ProducerRecord<Object, Object> record = ex.getFailedProducerRecord();
+                System.out.println("Fail to send message. record=" + record);
             }
-            @Override
-            public void onSuccess(SendResult<String,String> result){
-                var record = result.getProducerRecord();
-                System.out.println("Success to send message. record = " + record);
 
+            @Override
+            public void onSuccess(SendResult<String, String> result) {
+                System.out.println("Success to send message.");
             }
         });
+    }
+
+    public void async(String topic, Animal animal) {
+        kafkaJsonTemplate.send(topic, animal);
     }
 }
