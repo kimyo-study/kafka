@@ -15,6 +15,7 @@ import org.apache.kafka.clients.admin.DeleteRecordsResult;
 import org.apache.kafka.clients.admin.DeletedRecords;
 import org.apache.kafka.clients.admin.DescribeConfigsResult;
 import org.apache.kafka.clients.admin.ListConsumerGroupsResult;
+import org.apache.kafka.clients.admin.ListOffsetsResult;
 import org.apache.kafka.clients.admin.OffsetSpec;
 import org.apache.kafka.clients.admin.RecordsToDelete;
 import org.apache.kafka.common.KafkaFuture;
@@ -77,12 +78,12 @@ public class KafkaManager {
     public void deleteConsumerGroup() throws ExecutionException, InterruptedException {
         adminclient.deleteConsumerGroups(List.of("clip3-id","clip4-animal-listener")).all().get();
     }
-    public void findAllOffsets(){
+    public void findAllOffsets() throws ExecutionException, InterruptedException {
         Map<TopicPartition, OffsetSpec> target = new HashMap<>();
         target.put(new TopicPartition("clip4-listener", 0), OffsetSpec.latest());
         var result = adminclient.listOffsets(target);
         for (TopicPartition tp: target.keySet()){
-            System.out.println("topic= "+tp.topic()+", partition= "+tp.partition()+", offset= "+result.partitionResult(tp));
+            System.out.println("topic= "+tp.topic()+", partition= "+tp.partition()+", offset= "+result.partitionResult(tp).get());
         }
     }
 }
