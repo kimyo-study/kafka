@@ -17,7 +17,19 @@ public class Main {
     @Bean
     public ApplicationRunner runner(KafkaManager kafkaManager){
         return args -> {
-            kafkaManager.decribeTopicConfigs();
+            kafkaManager.describeTopicConfigs();
+            kafkaManager.changeConfig();
+            // kafkaManager.deleteRecords();
+            kafkaManager.findAllConsumerGroups();
+            kafkaManager.findAllOffsets();
+            try{
+                kafkaManager.deleteConsumerGroup();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            Thread.sleep(2000);
+            System.out.println("------ after delete consumer group -----");
+            kafkaManager.findAllConsumerGroups();
         };
     }
 }
