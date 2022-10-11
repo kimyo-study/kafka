@@ -4,10 +4,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 
-import com.su.kafka.model.Animal;
-import com.su.kafka.producer.ClipProducer;
+import com.su.kafka.service.KafkaManager;
 
 @SpringBootApplication
 public class Main {
@@ -17,13 +15,9 @@ public class Main {
     }
 
     @Bean
-    public ApplicationRunner runner(
-        ClipProducer clipProducer,
-        KafkaMessageListenerContainer<String, String> kafkaMessageListenerContainer
-    ){
+    public ApplicationRunner runner(KafkaManager kafkaManager){
         return args -> {
-            clipProducer.async("clip4-animal", new Animal("puppy",1));
-            Thread.sleep(3000);
+            kafkaManager.decribeTopicConfigs();
         };
     }
 }
